@@ -1,35 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="andrewly.receiptme"
-    android:installLocation="auto" >
+    android:installLocation="auto">
 
     <uses-feature android:name="android.hardware.camera" />
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
         android:fullBackupContent="false"
         android:hardwareAccelerated="true"
-        android:label="MultiTrackerApp"
-        android:supportsRtl = "true"
-        android:theme="@style/Theme.AppCompat" >
+        android:label="ReceiptMe"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat">
         <meta-data
             android:name="andrewly.receiptme.DEPENDENCIES"
             android:value="ocr" />
 
         <activity
-            android:name="andrewly.receiptme.MainActivity"
-            android:label="@string/title_activity_main" >
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name="andrewly.receiptme.OcrCaptureActivity"
+        <activity
+            android:name=".OcrCaptureActivity"
             android:label="Read Text" />
+        <activity android:name=".ParseImageActivity"></activity>
     </application>
 
 </manifest>

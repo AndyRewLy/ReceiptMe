@@ -1,12 +1,22 @@
 package andrewly.receiptme;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 
@@ -16,11 +26,13 @@ import com.google.android.gms.common.api.CommonStatusCodes;
  */
 public class MainActivity extends Activity implements View.OnClickListener {
 
+    public static final int IMAGE_GALLERY_REQUEST = 20;
     // Use a compound button so either checkbox or switch widgets work.
     private CompoundButton autoFocus;
     private CompoundButton useFlash;
     private TextView statusMessage;
     private TextView textValue;
+    private ImageView imgPicture;
 
     private static final int RC_OCR_CAPTURE = 9003;
     private static final String TAG = "MainActivity";
@@ -37,6 +49,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         useFlash = (CompoundButton) findViewById(R.id.use_flash);
 
         findViewById(R.id.read_text).setOnClickListener(this);
+        imgPicture = (ImageView)findViewById(R.id.imgPicture);
     }
 
     /**
@@ -54,6 +67,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             startActivityForResult(intent, RC_OCR_CAPTURE);
         }
+    }
+
+    public void onUploadClicked(View v) {
+        Intent uploadPhotoIntent = new Intent(Intent.ACTION_PICK);
+
+        File pictureDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        String pictureDirectoryPath = pictureDirectory.getPath();
+
+        Uri data = Uri.parse(pictureDirectoryPath);
+
+        uploadPhotoIntent.setDataAndType(data, "image/*");
+
+        startActivityForResult(uploadPhotoIntent, IMAGE_GALLERY_REQUEST);
     }
 
     /**
@@ -94,6 +120,31 @@ public class MainActivity extends Activity implements View.OnClickListener {
             } else {
                 statusMessage.setText(String.format(getString(R.string.ocr_error),
                         CommonStatusCodes.getStatusCodeString(resultCode)));
+            }
+        }
+        else if(resultCode == RESULT_OK && requestCode == IMAGE_GALLERY_REQUEST) {
+            Uri imageURI = data.getData();
+
+            //reading image data from SD card
+            InputStream inputStream;
+
+            try {
+                Intent parseImageActivityIntent = new Intent(this, ParseImageActivity.class);
+                parseImageActivityIntent.setData(imageURI);
+                inputStream = getContentResolver().openInputStream(imageURI);
+
+                // get a bitmap from the stream
+                Bitmap image = BitmapFactory.decodeStream(inputStream);
+
+                findViewById(R.id.imgPicture);
+                //show image to user
+                //imgPicture.setImageBitmap(image);
+                startActivity(parseImageActivityIntent);
+
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Unable to open image", Toast.LENGTH_LONG).show();
             }
         }
         else {
