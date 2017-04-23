@@ -14,13 +14,13 @@
         android:hardwareAccelerated="true"
         android:label="ReceiptMe"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <meta-data
             android:name="andrewly.receiptme.DEPENDENCIES"
             android:value="ocr" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".view.MainActivity"
             android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,9 +29,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".OcrCaptureActivity"
+            android:name=".view.OcrCaptureActivity"
             android:label="Read Text" />
-        <activity android:name=".ParseImageActivity"></activity>
+        <activity android:name=".view.ParseImageActivity"></activity>
     </application>
 
 </manifest>

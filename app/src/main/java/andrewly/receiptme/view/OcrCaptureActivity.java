@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package andrewly.receiptme;
+package andrewly.receiptme.view;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -30,7 +30,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -45,6 +44,10 @@ import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
 import java.io.IOException;
+
+import andrewly.receiptme.model.OcrDetectorProcessor;
+import andrewly.receiptme.model.OcrGraphic;
+import andrewly.receiptme.R;
 import andrewly.receiptme.camera.CameraSource;
 import andrewly.receiptme.camera.CameraSourcePreview;
 import andrewly.receiptme.camera.GraphicOverlay;
@@ -54,7 +57,7 @@ import andrewly.receiptme.camera.GraphicOverlay;
  * rear facing camera. During detection overlay graphics are drawn to indicate the position,
  * size, and contents of each TextBlock.
  */
-public final class OcrCaptureActivity extends AppCompatActivity {
+public final class OcrCaptureActivity extends MenuIncludedActivity {
     private static final String TAG = "OcrCaptureActivity";
 
     // Intent request code to handle updating play services if needed.

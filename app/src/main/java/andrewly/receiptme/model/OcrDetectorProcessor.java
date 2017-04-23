@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package andrewly.receiptme;
+package andrewly.receiptme.model;
 
 import android.util.SparseArray;
 
@@ -27,9 +27,9 @@ import com.google.android.gms.vision.text.TextBlock;
  */
 public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
 
-    private GraphicOverlay<OcrGraphic> mGraphicOverlay;
+    public GraphicOverlay<OcrGraphic> mGraphicOverlay;
 
-    OcrDetectorProcessor(GraphicOverlay<OcrGraphic> ocrGraphicOverlay) {
+    public OcrDetectorProcessor(GraphicOverlay<OcrGraphic> ocrGraphicOverlay) {
         mGraphicOverlay = ocrGraphicOverlay;
     }
 

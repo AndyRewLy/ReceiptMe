@@ -1,4 +1,4 @@
-package andrewly.receiptme;
+package andrewly.receiptme.view;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -7,7 +7,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -20,11 +25,13 @@ import java.io.InputStream;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 
+import andrewly.receiptme.R;
+
 /**
  * Main activity demonstrating how to pass extra parameters to an activity that
  * recognizes text.
  */
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends MenuIncludedActivity implements View.OnClickListener {
 
     public static final int IMAGE_GALLERY_REQUEST = 20;
     // Use a compound button so either checkbox or switch widgets work.
@@ -50,6 +57,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         findViewById(R.id.read_text).setOnClickListener(this);
         imgPicture = (ImageView)findViewById(R.id.imgPicture);
+
+        myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
     }
 
     /**
@@ -67,6 +77,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             startActivityForResult(intent, RC_OCR_CAPTURE);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
+        return true;
     }
 
     public void onUploadClicked(View v) {
