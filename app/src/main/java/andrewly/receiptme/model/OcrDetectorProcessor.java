@@ -17,7 +17,7 @@ package andrewly.receiptme.model;
 
 import android.util.SparseArray;
 
-import andrewly.receiptme.camera.GraphicOverlay;
+import andrewly.receiptme.controller.camera.GraphicOverlay;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.text.TextBlock;
 

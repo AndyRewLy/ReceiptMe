@@ -48,9 +48,9 @@ import java.io.IOException;
 import andrewly.receiptme.model.OcrDetectorProcessor;
 import andrewly.receiptme.model.OcrGraphic;
 import andrewly.receiptme.R;
-import andrewly.receiptme.camera.CameraSource;
-import andrewly.receiptme.camera.CameraSourcePreview;
-import andrewly.receiptme.camera.GraphicOverlay;
+import andrewly.receiptme.controller.camera.CameraSource;
+import andrewly.receiptme.controller.camera.CameraSourcePreview;
+import andrewly.receiptme.controller.camera.GraphicOverlay;
 
 /**
  * Activity for the multi-tracker app.  This app detects text and displays the value with the
