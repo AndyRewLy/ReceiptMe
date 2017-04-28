@@ -4,5 +4,5 @@ package andrewly.receiptme.model.categories;
  * Created by Andrew Ly on 4/28/2017.
  */
 
-public class Produce extends Category{
+public class Produce implements Category{
 }

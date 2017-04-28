@@ -5,4 +5,20 @@ package andrewly.receiptme.model;
  */
 
 public class Graph {
+
+    public void setItems() {
+
+    }
+
+    public void getItems() {
+
+    }
+
+    public void setCategory() {
+
+    }
+
+    public void getCategory() {
+
+    }
 }
