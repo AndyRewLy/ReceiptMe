@@ -90,7 +90,7 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
         rect.top = translateY(rect.top);
         rect.right = translateX(rect.right);
         rect.bottom = translateY(rect.bottom);
-        return (rect.left < x && rect.right > x && rect.top < y && rect.bottom > y);
+        return rect.left < x && rect.right > x && rect.top < y && rect.bottom > y;
     }
 
     /**
