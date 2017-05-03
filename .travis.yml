@@ -18,6 +18,11 @@ env:
  - ANDROID_BUILD_TOOLS=25.0.2
  - ADB_INSTALL_TIMEOUT=5 # minutes
 
+addons:
+  sonarqube:
+    organization: "305"
+
+
 android:
   components:
     - platform-tools
@@ -46,3 +51,5 @@ before_script:
   #- adb shell input keyevent 82 &
 
 script: ./gradlew clean build
+script:
+ - sonar-scanner
