@@ -7,6 +7,7 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -20,7 +21,7 @@
             android:value="ocr" />
 
         <activity
-            android:name=".view.MainActivity"
+            android:name=".view.Main2Activity"
             android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,7 +32,7 @@
         <activity
             android:name=".view.OcrCaptureActivity"
             android:label="Read Text" />
-        <activity android:name=".view.ParseImageActivity"></activity>
+        <activity android:name=".view.ParseImageActivity" />
     </application>
 
 </manifest>

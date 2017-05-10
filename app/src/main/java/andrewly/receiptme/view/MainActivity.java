@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.os.Environment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -44,12 +45,14 @@ public class MainActivity extends MenuIncludedActivity implements View.OnClickLi
     private static final int RC_OCR_CAPTURE = 9003;
     private static final String TAG = "MainActivity";
 
+    ViewPager viewPager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        statusMessage = (TextView)findViewById(R.id.status_message);
+        /*statusMessage = (TextView)findViewById(R.id.status_message);
         textValue = (TextView)findViewById(R.id.text_value);
 
         autoFocus = (CompoundButton) findViewById(R.id.auto_focus);
@@ -59,7 +62,7 @@ public class MainActivity extends MenuIncludedActivity implements View.OnClickLi
         imgPicture = (ImageView)findViewById(R.id.imgPicture);
 
         myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
+        setSupportActionBar(myToolbar);*/
     }
 
     /**
@@ -143,8 +146,7 @@ public class MainActivity extends MenuIncludedActivity implements View.OnClickLi
                 statusMessage.setText(String.format(getString(R.string.ocr_error),
                         CommonStatusCodes.getStatusCodeString(resultCode)));
             }
-        }
-        else if(resultCode == RESULT_OK && requestCode == IMAGE_GALLERY_REQUEST) {
+        } else if (resultCode == RESULT_OK && requestCode == IMAGE_GALLERY_REQUEST) {
             Uri imageURI = data.getData();
 
             //reading image data from SD card
@@ -168,8 +170,7 @@ public class MainActivity extends MenuIncludedActivity implements View.OnClickLi
                 e.printStackTrace();
                 Toast.makeText(this, "Unable to open image", Toast.LENGTH_LONG).show();
             }
-        }
-        else {
+        } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }

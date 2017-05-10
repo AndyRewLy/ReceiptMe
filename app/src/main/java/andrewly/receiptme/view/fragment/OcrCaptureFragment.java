@@ -1,19 +1,4 @@
-/*
- * Copyright (C) The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package andrewly.receiptme.view;
+package andrewly.receiptme.view.fragment;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -25,16 +10,25 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -43,25 +37,45 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.text.*;
+import java.util.*;
 
-import andrewly.receiptme.model.OcrDetectorProcessor;
-import andrewly.receiptme.model.OcrGraphic;
 import andrewly.receiptme.R;
 import andrewly.receiptme.controller.camera.CameraSource;
 import andrewly.receiptme.controller.camera.CameraSourcePreview;
 import andrewly.receiptme.controller.camera.GraphicOverlay;
+import andrewly.receiptme.model.OcrDetectorProcessor;
+import andrewly.receiptme.model.OcrGraphic;
+import andrewly.receiptme.view.Main2Activity;
+import andrewly.receiptme.view.OcrCaptureActivity;
+import andrewly.receiptme.view.ParseImageActivity;
+
+import static andrewly.receiptme.view.Main2Activity.mSectionsPagerAdapter;
+import static andrewly.receiptme.view.Main2Activity.mViewPager;
+import static andrewly.receiptme.view.MainActivity.IMAGE_GALLERY_REQUEST;
+import static android.app.Activity.RESULT_OK;
+import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 /**
- * Activity for the multi-tracker app.  This app detects text and displays the value with the
- * rear facing camera. During detection overlay graphics are drawn to indicate the position,
- * size, and contents of each TextBlock.
+ * Created by Andrew Ly on 5/8/2017.
  */
-public final class OcrCaptureActivity extends MenuIncludedActivity {
+
+public class OcrCaptureFragment extends Fragment {
+
+    public static final int MEDIA_TYPE_IMAGE = 1;
+    public static final int MEDIA_TYPE_VIDEO = 2;
+
     private static final String TAG = "OcrCaptureActivity";
 
     // Intent request code to handle updating play services if needed.
     private static final int RC_HANDLE_GMS = 9001;
+    private static final int RC_OCR_CAPTURE = 9003;
+    public static final int IMAGE_GALLERY_REQUEST = 20;
 
     // Permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
@@ -79,38 +93,106 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
+    //Picture callback
+    private CameraSource.PictureCallback mPicture;
+
     /**
-     * Initializes the UI and creates the detector pipeline.
+     * The fragment argument representing the section number for this
+     * fragment.
      */
+    private static final String ARG_SECTION_NUMBER = "section_number";
+
+    public OcrCaptureFragment() {
+    }
+
+    /**
+     * Returns a new instance of this fragment for the given section
+     * number.
+     */
+    public static OcrCaptureFragment newInstance(int sectionNumber) {
+        OcrCaptureFragment fragment = new OcrCaptureFragment();
+        Bundle args = new Bundle();
+        args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
-        setContentView(R.layout.ocr_capture);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView;
 
-        mPreview = (CameraSourcePreview) findViewById(R.id.preview);
-        mGraphicOverlay = (GraphicOverlay<OcrGraphic>) findViewById(R.id.graphicOverlay);
+        rootView = inflater.inflate(R.layout.fragment_main2_ocr_capture, container, false);
 
-        // read parameters from the intent used to launch the activity.
-        boolean autoFocus = getIntent().getBooleanExtra(AutoFocus, false);
-        boolean useFlash = getIntent().getBooleanExtra(UseFlash, false);
+        mPreview = (CameraSourcePreview) rootView.findViewById(R.id.preview);
+        mGraphicOverlay = (GraphicOverlay<OcrGraphic>) rootView.findViewById(R.id.graphicOverlay);
+        mPicture = createPictureCallBack();
 
-        // Check for the camera permission before accessing the camera.  If the
-        // permission is not granted yet, request permission.
-        int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        int rc = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED) {
-            createCameraSource(autoFocus, useFlash);
+            createCameraSource(true, false);
         } else {
             requestCameraPermission();
         }
 
-        gestureDetector = new GestureDetector(this, new CaptureGestureListener());
-        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
+        FloatingActionButton takePictureFab = (FloatingActionButton) rootView.findViewById(R.id.fab_ocr);
+        takePictureFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //get an image from the camera
+                mCameraSource.takePicture(null, mPicture);
+            }
+        });
 
-        Snackbar.make(mGraphicOverlay, "Tap to capture. Pinch/Stretch to zoom",
-                Snackbar.LENGTH_LONG)
-                .show();
+        FloatingActionButton uploadFab = (FloatingActionButton) rootView.findViewById(R.id.fab_upload);
+        uploadFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent uploadPhotoIntent = new Intent(Intent.ACTION_PICK);
+
+                File pictureDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                String pictureDirectoryPath = pictureDirectory.getPath();
+
+                Uri data = Uri.parse(pictureDirectoryPath);
+
+                uploadPhotoIntent.setDataAndType(data, "image/*");
+
+                startActivityForResult(uploadPhotoIntent, IMAGE_GALLERY_REQUEST);
+
+                Snackbar.make(view, "Upload a photo from gallery", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
+        return rootView;
     }
 
+    private CameraSource.PictureCallback createPictureCallBack() {
+        CameraSource.PictureCallback returnCallBack = new CameraSource.PictureCallback() {
+            @Override
+            public void onPictureTaken(byte[] data) {
+                File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+
+                if (pictureFile == null) {
+                    Log.d(TAG, "Error creating media file, check storage permissions:");
+                    return;
+                }
+
+                try {
+                    FileOutputStream fos = new FileOutputStream(pictureFile);
+                    fos.write(data);
+                    fos.close();
+                    Log.d(TAG,"file has been written");
+                } catch (FileNotFoundException e) {
+                    Log.d(TAG, "File not found: " + e.getMessage());
+                } catch (IOException e) {
+                    Log.d(TAG, "Error accessing file: " + e.getMessage());
+                }
+            }
+        };
+
+        return returnCallBack;
+    }
     /**
      * Handles the requesting of the camera permission.  This includes
      * showing a "Snackbar" message of why the permission is needed then
@@ -121,13 +203,13 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
 
         final String[] permissions = new String[]{Manifest.permission.CAMERA};
 
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                 Manifest.permission.CAMERA)) {
-            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
+            ActivityCompat.requestPermissions(getActivity(), permissions, RC_HANDLE_CAMERA_PERM);
             return;
         }
 
-        final Activity thisActivity = this;
+        final Activity thisActivity = getActivity();
 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
@@ -143,13 +225,12 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
                 .show();
     }
 
-    @Override
     public boolean onTouchEvent(MotionEvent e) {
         boolean b = scaleGestureDetector.onTouchEvent(e);
 
         boolean c = gestureDetector.onTouchEvent(e);
 
-        return b || c || super.onTouchEvent(e);
+        return b || c || getActivity().onTouchEvent(e);
     }
 
     /**
@@ -162,7 +243,7 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
      */
     @SuppressLint("InlinedApi")
     private void createCameraSource(boolean autoFocus, boolean useFlash) {
-        Context context = getApplicationContext();
+        Context context = getActivity().getApplicationContext();
 
         // A text recognizer is created to find text.  An associated processor instance
         // is set to receive the text recognition results and display graphics for each text block
@@ -185,10 +266,10 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
             // Check for low storage.  If there is low storage, the native library will not be
             // downloaded, so detection will not become operational.
             IntentFilter lowstorageFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
-            boolean hasLowStorage = registerReceiver(null, lowstorageFilter) != null;
+            boolean hasLowStorage = getActivity().registerReceiver(null, lowstorageFilter) != null;
 
             if (hasLowStorage) {
-                Toast.makeText(this, R.string.low_storage_error, Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), R.string.low_storage_error, Toast.LENGTH_LONG).show();
                 Log.w(TAG, getString(R.string.low_storage_error));
             }
         }
@@ -196,20 +277,20 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
         // Creates and starts the camera.  Note that this uses a higher resolution in comparison
         // to other detection examples to enable the text recognizer to detect small pieces of text.
         mCameraSource =
-                new CameraSource.Builder(getApplicationContext(), textRecognizer)
-                .setFacing(CameraSource.CAMERA_FACING_BACK)
-                .setRequestedPreviewSize(1280, 1024)
-                .setRequestedFps(2.0f)
-                .setFlashMode(useFlash ? Camera.Parameters.FLASH_MODE_TORCH : null)
-                .setFocusMode(autoFocus ? Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE : null)
-                .build();
+                new CameraSource.Builder(getActivity().getApplicationContext(), textRecognizer)
+                        .setFacing(CameraSource.CAMERA_FACING_BACK)
+                        .setRequestedPreviewSize(1280, 1024)
+                        .setRequestedFps(2.0f)
+                        .setFlashMode(useFlash ? Camera.Parameters.FLASH_MODE_TORCH : null)
+                        .setFocusMode(autoFocus ? Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE : null)
+                        .build();
     }
 
     /**
      * Restarts the camera.
      */
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         startCameraSource();
     }
@@ -218,7 +299,7 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
      * Stops the camera.
      */
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         if (mPreview != null) {
             mPreview.stop();
@@ -230,7 +311,7 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
      * rest of the processing pipeline.
      */
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         if (mPreview != null) {
             mPreview.release();
@@ -266,8 +347,8 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
         if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "Camera permission granted - initialize the camera source");
             // We have permission, so create the camerasource
-            boolean autoFocus = getIntent().getBooleanExtra(AutoFocus,false);
-            boolean useFlash = getIntent().getBooleanExtra(UseFlash, false);
+            boolean autoFocus = getActivity().getIntent().getBooleanExtra(AutoFocus,false);
+            boolean useFlash = getActivity().getIntent().getBooleanExtra(UseFlash, false);
             createCameraSource(autoFocus, useFlash);
             return;
         }
@@ -277,11 +358,11 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
 
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                finish();
+                getActivity().finish();
             }
         };
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Multitracker sample")
                 .setMessage(R.string.no_camera_permission)
                 .setPositiveButton(R.string.ok, listener)
@@ -295,11 +376,12 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
      */
     private void startCameraSource() throws SecurityException {
         // Check that the device has play services available.
+
         int code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
-                getApplicationContext());
+                getActivity().getApplicationContext());
         if (code != ConnectionResult.SUCCESS) {
             Dialog dlg =
-                    GoogleApiAvailability.getInstance().getErrorDialog(this, code, RC_HANDLE_GMS);
+                    GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), code, RC_HANDLE_GMS);
             dlg.show();
         }
 
@@ -324,15 +406,14 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
      */
     private boolean onTap(float rawX, float rawY) {
         OcrGraphic graphic = mGraphicOverlay.getGraphicAtLocation(rawX, rawY);
-
         TextBlock text = null;
         if (graphic != null) {
             text = graphic.getTextBlock();
             if (text != null && text.getValue() != null) {
                 Intent data = new Intent();
                 data.putExtra(TextBlockObject, text.getValue());
-                setResult(CommonStatusCodes.SUCCESS, data);
-                finish();
+                getActivity().setResult(CommonStatusCodes.SUCCESS, data);
+                getActivity().finish();
             }
             else {
                 Log.d(TAG, "text data is null");
@@ -404,5 +485,91 @@ public final class OcrCaptureActivity extends MenuIncludedActivity {
         public void onScaleEnd(ScaleGestureDetector detector) {
             mCameraSource.doZoom(detector.getScaleFactor());
         }
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == RC_OCR_CAPTURE) {
+            if (resultCode == CommonStatusCodes.SUCCESS) {
+                if (data != null) {
+                    Log.d("LETS GOOOOO", "SUCCESS CAUSE DATA NOT NULL");
+                    String text = data.getStringExtra(OcrCaptureActivity.TextBlockObject);
+                    //statusMessage.setText(R.string.ocr_success);
+                    //textValue.setText(text);
+                    //Log.d(TAG, "Text read: " + text);
+                } else {
+                    //statusMessage.setText(R.string.ocr_failure);
+                    Log.d(TAG, "No Text captured, intent data is null");
+                }
+            } else {
+                //statusMessage.setText(String.format(getString(R.string.ocr_error),
+                 //       CommonStatusCodes.getStatusCodeString(resultCode)));
+            }
+        } else if (resultCode == RESULT_OK && requestCode == IMAGE_GALLERY_REQUEST) {
+            Uri imageURI = data.getData();
+
+            //reading image data from SD card
+            InputStream inputStream;
+
+            try {
+                Intent parseImageActivityIntent = new Intent(getActivity(), ParseImageActivity.class);
+                parseImageActivityIntent.setData(imageURI);
+                inputStream = getActivity().getContentResolver().openInputStream(imageURI);
+
+                // get a bitmap from the stream
+                Bitmap image = BitmapFactory.decodeStream(inputStream);
+
+                getActivity().findViewById(R.id.imgPicture);
+                //show image to user
+                //imgPicture.setImageBitmap(image);
+                startActivity(parseImageActivityIntent);
+
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(getActivity(), "Unable to open image", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    //Camera Output information
+
+    private static Uri getOutputMediaFileUri(int type) {
+        return Uri.fromFile(getOutputMediaFile(type));
+    }
+
+    private static File getOutputMediaFile(int type) {
+        // To be safe, you should check that the SDCard is mounted
+        // using Environment.getExternalStorageState() before doing this.
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "ReceiptMe");
+        // This location works best if you want the created images to be shared
+        // between applications and persist after your app has been uninstalled.
+
+        // Create the storage directory if it does not exist
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
+                Log.d("MyCameraApp", "failed to create directory");
+                return null;
+            }
+        }
+
+        Log.d(TAG, "Directory already exists");
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile;
+        if (type == MEDIA_TYPE_IMAGE){
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "IMG_"+ timeStamp + ".jpg");
+        } else if(type == MEDIA_TYPE_VIDEO) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "VID_"+ timeStamp + ".mp4");
+        } else {
+            return null;
+        }
+
+        return mediaFile;
     }
 }
