@@ -6,12 +6,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.DragEvent;
@@ -36,6 +38,8 @@ import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.woxthebox.draglistview.DragListView;
 
 import java.io.FileNotFoundException;
@@ -44,38 +48,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 import andrewly.receiptme.R;
+import andrewly.receiptme.controller.ItemAdapter;
+import andrewly.receiptme.model.DatabaseHelper;
 import andrewly.receiptme.model.PurchasedItem;
+import andrewly.receiptme.model.dao.ItemDao;
 
 import static android.R.attr.category;
 import static android.R.attr.value;
 
 @SuppressWarnings("CheckStyle")
-public class ParseImageActivity extends MenuIncludedActivity {
+public class ParseImageActivity extends MenuIncludedActivity implements ItemAdapter.ItemClickCallback {
+
+    private DatabaseHelper databaseHelper;
 
     private ImageView imgPicture;
     private Bitmap imageBitmap;
     private List<Double> parsedPriceList;
     private List<String> itemsList;
     private android.widget.TableRow.LayoutParams layoutParams;
+    private List<PurchasedItem> listData;
 
     private RecyclerView itemRecyclerView;
-    private RecyclerView.Adapter itemAdapter;
-    private RecyclerView.LayoutManager itemLayoutManager;
+    private ItemAdapter adapter;
 
     private String msg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_parse_image);
+        setContentView(R.layout.fragment_main2_parse_image);
+
+        //initialize database
+        databaseHelper = new DatabaseHelper(this);
 
         //RecyclerView setting
-        //itemRecyclerView = (RecyclerView)findViewById(R.id.item_recycler_view);
-        //itemRecyclerView.setHasFixedSize(true);
-        //itemLayoutManager = new LinearLayoutManager(this);
-        //itemRecyclerView.setLayoutManager(itemLayoutManager);
+        itemRecyclerView = (RecyclerView) findViewById(R.id.rec_list);
 
-        imgPicture = (ImageView)findViewById(R.id.imgPicture);
+        //LayoutManager: Using LinearLayout to show a lit
+        itemRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        //Adding ItemTouchHelper
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(createHelperCallback());
+        itemTouchHelper.attachToRecyclerView(itemRecyclerView);
+
+        imgPicture = (ImageView) findViewById(R.id.imgPicture);
         parsedPriceList = new ArrayList<>();
         itemsList = new ArrayList<>();
 
@@ -98,8 +115,22 @@ public class ParseImageActivity extends MenuIncludedActivity {
             Toast.makeText(this, "Unable to open image", Toast.LENGTH_LONG).show();
         }
 
-        //itemAdapter = new RecyclerView.ItemAdapter();
-        createDataTable();
+        listData = (ArrayList) ItemDao.getCreatedListData(itemsList, parsedPriceList);
+
+
+        //Setting the adapter here
+        adapter = new ItemAdapter(listData, this);
+        itemRecyclerView.setAdapter(adapter);
+
+        //Setup the Save FAB
+        FloatingActionButton takePictureFab = (FloatingActionButton) findViewById(R.id.fab_submit_data);
+        takePictureFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //process data from another method
+                databaseHelper.insertPurchasedItems(listData);
+            }
+        });
     }
 
     @Override
@@ -144,8 +175,7 @@ public class ParseImageActivity extends MenuIncludedActivity {
                 Log.i("Recognize Text", "Text Found: " + textValues.get(i).getValue());
                 if (checkIfTextIsPrice(textValues.get(i).getValue())) {
 
-                }
-                else {
+                } else {
                     checkIfTextIsItem(textValues.get(i).getValue());
                 }
             }
@@ -156,14 +186,14 @@ public class ParseImageActivity extends MenuIncludedActivity {
         double tempValue;
 
         if (value.contains(".")) {
-            value = value.replaceAll("[^0-9.]","");
+            value = value.replaceAll("[^0-9.]", "");
             Log.i("Recognize Text", "obtained value of " + value);
 
             String[] removeSpaces = value.split(" ");
 
             for (int i = 0; i < removeSpaces.length; i++) {
                 tempValue = Double.parseDouble(removeSpaces[i]);
-                parsedPriceList.add((Double)tempValue);
+                parsedPriceList.add((Double) tempValue);
                 return true;
             }
         }
@@ -178,7 +208,7 @@ public class ParseImageActivity extends MenuIncludedActivity {
     }
 
     public void createDataTable() {
-        TableLayout itemPrices = (TableLayout)findViewById(R.id.item_price_table);
+        TableLayout itemPrices = (TableLayout) findViewById(R.id.item_price_table);
 
         itemPrices.setStretchAllColumns(true);
         itemPrices.bringToFront();
@@ -229,8 +259,8 @@ public class ParseImageActivity extends MenuIncludedActivity {
         c1.setTextSize(16);
         c2.setTextSize(16);
 
-        c1.setPadding(0,10,0,10);
-        c2.setPadding(0,10,0,10);
+        c1.setPadding(0, 10, 0, 10);
+        c2.setPadding(0, 10, 0, 10);
 
         //setItemDragListener(c1);
         //setItemDragListener(c2);
@@ -248,7 +278,7 @@ public class ParseImageActivity extends MenuIncludedActivity {
     private Spinner createSpinner() {
         Spinner retSpinner = new Spinner(this);
         List<String> list = new ArrayList<String>();
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.category_array, R.layout.support_simple_spinner_dropdown_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.category_array, R.layout.custom_text_view);
 
         retSpinner.setAdapter(adapter);
 
@@ -260,13 +290,13 @@ public class ParseImageActivity extends MenuIncludedActivity {
         text.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                ClipData.Item item = new ClipData.Item((CharSequence)v.getTag());
+                ClipData.Item item = new ClipData.Item((CharSequence) v.getTag());
                 String[] mimeTypes = {ClipDescription.MIMETYPE_TEXT_PLAIN};
 
-                ClipData dragData = new ClipData(v.getTag().toString(),mimeTypes, item);
+                ClipData dragData = new ClipData(v.getTag().toString(), mimeTypes, item);
                 View.DragShadowBuilder myShadow = new View.DragShadowBuilder(text);
 
-                v.startDrag(dragData,myShadow,null,0);
+                v.startDrag(dragData, myShadow, null, 0);
                 return true;
             }
         });
@@ -274,9 +304,9 @@ public class ParseImageActivity extends MenuIncludedActivity {
         text.setOnDragListener(new View.OnDragListener() {
             @Override
             public boolean onDrag(View v, DragEvent event) {
-                switch(event.getAction()) {
+                switch (event.getAction()) {
                     case DragEvent.ACTION_DRAG_STARTED:
-                        layoutParams = (TableRow.LayoutParams)v.getLayoutParams();
+                        layoutParams = (TableRow.LayoutParams) v.getLayoutParams();
                         Log.d(msg, "Action is DragEvent.ACTION_DRAG_STARTED");
                         break;
                     case DragEvent.ACTION_DRAG_ENTERED:
@@ -285,7 +315,7 @@ public class ParseImageActivity extends MenuIncludedActivity {
                         int y_cord = (int) event.getY();
                         break;
 
-                    case DragEvent.ACTION_DRAG_EXITED :
+                    case DragEvent.ACTION_DRAG_EXITED:
                         Log.d(msg, "Action is DragEvent.ACTION_DRAG_EXITED");
                         x_cord = (int) event.getX();
                         y_cord = (int) event.getY();
@@ -294,13 +324,13 @@ public class ParseImageActivity extends MenuIncludedActivity {
                         v.setLayoutParams(layoutParams);
                         break;
 
-                    case DragEvent.ACTION_DRAG_LOCATION  :
+                    case DragEvent.ACTION_DRAG_LOCATION:
                         Log.d(msg, "Action is DragEvent.ACTION_DRAG_LOCATION");
                         x_cord = (int) event.getX();
                         y_cord = (int) event.getY();
                         break;
 
-                    case DragEvent.ACTION_DRAG_ENDED   :
+                    case DragEvent.ACTION_DRAG_ENDED:
                         Log.d(msg, "Action is DragEvent.ACTION_DRAG_ENDED");
                         v.setVisibility(View.VISIBLE);
                         // Do nothing
@@ -311,7 +341,8 @@ public class ParseImageActivity extends MenuIncludedActivity {
                         v.setVisibility(View.VISIBLE);
                         // Do nothing
                         break;
-                    default: break;
+                    default:
+                        break;
                 }
                 return true;
             }
@@ -333,12 +364,12 @@ public class ParseImageActivity extends MenuIncludedActivity {
             }
         });
     }
+
     private String getItem(List<? extends Object> arr, int idx) {
 
         if (idx >= arr.size() || arr.get(idx) == null) {
             return "";
-        }
-        else {
+        } else {
             return arr.get(idx).toString();
         }
     }
@@ -346,51 +377,44 @@ public class ParseImageActivity extends MenuIncludedActivity {
     private int maxSizeOfItems() {
         if (parsedPriceList.size() >= itemsList.size()) {
             return parsedPriceList.size();
-        }
-        else {
+        } else {
             return itemsList.size();
         }
     }
 
-    private class ItemHolder extends RecyclerView.ViewHolder {
-        public TextView itemName;
-        public TextView itemPrice;
+    private ItemTouchHelper.Callback createHelperCallback() {
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback =
+                new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+                        ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
-        public ItemHolder(View itemView) {
-            super(itemView);
-            itemName = (TextView) itemView.findViewById(R.id.itemName);
-            itemPrice = (TextView) itemView.findViewById(R.id.cost);
-        }
+                    @Override
+                    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                          RecyclerView.ViewHolder target) {
+                        //moveItem(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                        return true;
+                    }
+
+                    @Override
+                    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                        deleteItem(viewHolder.getAdapterPosition());
+                    }
+                };
+
+        return simpleItemTouchCallback;
     }
 
-    private class ItemAdapter extends RecyclerView.Adapter<ItemHolder> {
-        private List<String> itemName;
-        private List<Double> itemPrice;
-
-        public ItemAdapter(List<String> itemName, List<Double> itemPrice) {
-            this.itemName = itemName;
-            this.itemPrice = itemPrice;
-        }
-
-        @Override
-        public ItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LayoutInflater layoutInflater = LayoutInflater.from(getApplicationContext());
-            View view = layoutInflater.inflate(R.layout.fragment_list_item, parent, false);
-            return new ItemHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(ItemHolder holder, int position) {
-        }
-
-        @Override
-        public int getItemCount() {
-            return itemName.size();
-        }
+    private void deleteItem(final int position) {
+        listData.remove(position);
+        adapter.notifyItemRemoved(position);
     }
 
-    private void updateUI() {
-        itemAdapter = new ItemAdapter(itemsList, parsedPriceList);
-        itemRecyclerView.setAdapter(itemAdapter);
+    @Override
+    public void onItemClick(int p) {
+        //TO-DO
+    }
+
+    @Override
+    public void onSecondaryIconClick(int p) {
+        //TO-DO
     }
 }

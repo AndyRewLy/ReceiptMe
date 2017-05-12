@@ -6,17 +6,22 @@
     android:layout_height="match_parent"
     tools:context="andrewly.receiptme.view.ParseImageActivity">
 
-    <TableLayout
-        android:id="@+id/item_price_table"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rec_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/my_toolbar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-    </TableLayout>
+        android:layout_weight="1" />
 
-    <ImageView
-        android:id="@+id/imgPicture"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_submit_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="@dimen/fab_margin"
+        app:backgroundTint="@android:color/holo_blue_dark"
+        app:layout_anchorGravity="bottom|left|end"
+        app:srcCompat="@android:drawable/ic_menu_save" />
+
 </RelativeLayout>

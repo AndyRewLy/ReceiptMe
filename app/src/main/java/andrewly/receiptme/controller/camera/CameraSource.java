@@ -500,6 +500,7 @@ public class CameraSource {
                 startCallback.mDelegate = shutter;
                 PictureDoneCallback doneCallback = new PictureDoneCallback();
                 doneCallback.mDelegate = jpeg;
+                Log.d("Taking Picture", "Callbacks are being run I guess");
                 mCamera.takePicture(startCallback, null, null, doneCallback);
             }
         }

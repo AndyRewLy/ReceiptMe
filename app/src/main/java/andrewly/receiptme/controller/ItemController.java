@@ -1,7 +1,7 @@
 package andrewly.receiptme.controller;
 
+import andrewly.receiptme.model.PurchasedItem;
 import andrewly.receiptme.model.categories.Category;
-import andrewly.receiptme.model.categories.Item;
 
 /**
  * Created by Andrew Ly on 4/28/2017.
@@ -9,11 +9,11 @@ import andrewly.receiptme.model.categories.Item;
 
 public class ItemController {
 
-    public void addItemIntoCategory(Category c, Item i) {
+    public void addItemIntoCategory(Category c, PurchasedItem i) {
 
     }
 
-    public void removeItemFromCategory(Category c, Item i) {
+    public void removeItemFromCategory(Category c, PurchasedItem i) {
 
     }
 

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "574617523812",
+    "firebase_url": "https://receiptme-39105.firebaseio.com",
+    "project_id": "receiptme-39105",
+    "storage_bucket": "receiptme-39105.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:574617523812:android:aadfa04da4f5acb0",
+        "android_client_info": {
+          "package_name": "andrewly.receiptme"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "574617523812-0ap764qvuk9sa8k2erp8j6v0gbs866nn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "andrewly.receiptme",
+            "certificate_hash": "d095988f9dc3cbee6d026a9524dbb0f2ee9f47cb"
+          }
+        },
+        {
+          "client_id": "574617523812-9n28ccuh8kthmffvskk0j88qo5tr3u8r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDlj1deeBdTuinRz7wPeXjVukJ5fcLd-g"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "574617523812-9n28ccuh8kthmffvskk0j88qo5tr3u8r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -29,6 +29,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -37,7 +38,10 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -58,6 +62,9 @@ import andrewly.receiptme.view.ParseImageActivity;
 import static andrewly.receiptme.view.Main2Activity.mSectionsPagerAdapter;
 import static andrewly.receiptme.view.Main2Activity.mViewPager;
 import static andrewly.receiptme.view.MainActivity.IMAGE_GALLERY_REQUEST;
+//import static andrewly.receiptme.view.fragment.ScaleListener.decodeFile;
+//import static andrewly.receiptme.view.fragment.ScaleListener.decodeStream;
+import static android.R.attr.data;
 import static android.app.Activity.RESULT_OK;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
@@ -96,6 +103,9 @@ public class OcrCaptureFragment extends Fragment {
     //Picture callback
     private CameraSource.PictureCallback mPicture;
 
+    private ImageView showImageView;
+    protected String imageFilePath;
+
     /**
      * The fragment argument representing the section number for this
      * fragment.
@@ -128,6 +138,8 @@ public class OcrCaptureFragment extends Fragment {
         mGraphicOverlay = (GraphicOverlay<OcrGraphic>) rootView.findViewById(R.id.graphicOverlay);
         mPicture = createPictureCallBack();
 
+        showImageView = (ImageView) rootView.findViewById(R.id.imagePreview);
+
         int rc = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED) {
             createCameraSource(true, false);
@@ -140,6 +152,7 @@ public class OcrCaptureFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //get an image from the camera
+                Log.d("Taking Picture", "Button was pressed");
                 mCameraSource.takePicture(null, mPicture);
             }
         });
@@ -167,7 +180,94 @@ public class OcrCaptureFragment extends Fragment {
         return rootView;
     }
 
+
     private CameraSource.PictureCallback createPictureCallBack() {
+        CameraSource.PictureCallback retCallBack = new CameraSource.PictureCallback() {
+            public void onPictureTaken(byte[] data) {
+                FileOutputStream outStream = null;
+                try
+
+                {
+                    Log.d("Taking Photo", "Inside the photo callback phase 0");
+                    File miDirs = new File(
+                            Environment.getExternalStorageDirectory() + "/ReceiptMe");
+
+                    if (!miDirs.exists()) {
+                        miDirs.mkdirs();
+                        Log.d("Taking Photo", "Created the directory for ReceiptMe");
+                    }
+
+                    Log.d("Taking Photo", "Inside the photo callback phase 1");
+                    final Calendar c = Calendar.getInstance();
+                    String new_Date = c.get(Calendar.DAY_OF_MONTH) + "-"
+                            + ((c.get(Calendar.MONTH)) + 1) + "-"
+                            + c.get(Calendar.YEAR) + " " + c.get(Calendar.HOUR)
+                            + "-" + c.get(Calendar.MINUTE) + "-"
+                            + c.get(Calendar.SECOND);
+
+                    Log.d("Taking Photo", "Inside the photo callback phase 2");
+                    imageFilePath = String.format(
+                            Environment.getExternalStorageDirectory() + "/ReceiptMe"
+                                    + "/%s.jpg", "te1t(" + new_Date + ")");
+
+                    Log.d("Taking Photo", "Inside the photo callback phase 3");
+                    Uri selectedImage = Uri.parse(imageFilePath);
+                    File file = new File(imageFilePath);
+                    String path = file.getAbsolutePath();
+                    Bitmap bitmap = null;
+
+                    Log.d("Taking Photo", "Inside the photo callback phase 4" + file);
+                    outStream = new FileOutputStream(file);
+                    Log.d("Taking Photo", "Issue happens after creating the outStream");
+                    outStream.write(data);
+                    outStream.close();
+
+                    Log.d("Taking Picture", "The path value is now " + path);
+                    if (path != null) {
+                        if (path.startsWith("content")) {
+                            bitmap = decodeStream(file, selectedImage,
+                                    getActivity().getApplicationContext());
+                        } else {
+                            bitmap = decodeFile(file, 10);
+                        }
+                    }
+                    if (bitmap != null) {
+                        showImageView.setImageBitmap(bitmap);
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "Picture Captured Successfully:", Toast.LENGTH_LONG)
+                                .show();
+                    } else {
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "Failed to Capture the picture. kindly Try Again:",
+                                Toast.LENGTH_LONG).show();
+                    }
+                } catch (
+                        FileNotFoundException e)
+
+                {
+                    e.printStackTrace();
+                } catch (
+                        IOException e)
+
+                {
+                    e.printStackTrace();
+                } finally
+
+                {
+                    //if (mPreview != null) {
+                    //    mPreview.release();
+                    //}
+                    //if (mCameraSource != null) {
+                    //    mCameraSource.release();
+                    //}
+                }
+            }
+        };
+
+        return retCallBack;
+    };
+
+    /*private CameraSource.PictureCallback createPictureCallBack() {
         CameraSource.PictureCallback returnCallBack = new CameraSource.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] data) {
@@ -182,17 +282,32 @@ public class OcrCaptureFragment extends Fragment {
                     FileOutputStream fos = new FileOutputStream(pictureFile);
                     fos.write(data);
                     fos.close();
+
+                    FileInputStream pictureStream = new FileInputStream(pictureFile);
+                    Bitmap bitmap = BitmapFactory.decodeStream(pictureStream);
+
+
+                    Intent intent = new Intent();
+
+                    Uri intentData = Uri.fromFile(pictureFile);
+
+                    intent.setDataAndType(intentData, "image/*");
+
+                    startActivityForResult(intent, RC_OCR_CAPTURE);
+
                     Log.d(TAG,"file has been written");
                 } catch (FileNotFoundException e) {
                     Log.d(TAG, "File not found: " + e.getMessage());
                 } catch (IOException e) {
                     Log.d(TAG, "Error accessing file: " + e.getMessage());
                 }
+
             }
         };
 
         return returnCallBack;
-    }
+    }*/
+
     /**
      * Handles the requesting of the camera permission.  This includes
      * showing a "Snackbar" message of why the permission is needed then
@@ -488,14 +603,32 @@ public class OcrCaptureFragment extends Fragment {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("Picture Taken", "On Activity Result method rn");
         if(requestCode == RC_OCR_CAPTURE) {
             if (resultCode == CommonStatusCodes.SUCCESS) {
                 if (data != null) {
+                    Uri imageURI = data.getData();
+
                     Log.d("LETS GOOOOO", "SUCCESS CAUSE DATA NOT NULL");
                     String text = data.getStringExtra(OcrCaptureActivity.TextBlockObject);
-                    //statusMessage.setText(R.string.ocr_success);
-                    //textValue.setText(text);
-                    //Log.d(TAG, "Text read: " + text);
+
+                    try {
+                        Intent parseImageActivityIntent = new Intent(getActivity(), ParseImageActivity.class);
+                        parseImageActivityIntent.setData(imageURI);
+                        InputStream inputStream = getActivity().getContentResolver().openInputStream(imageURI);
+
+                        // get a bitmap from the stream
+                        Bitmap image = BitmapFactory.decodeStream(inputStream);
+
+                        getActivity().findViewById(R.id.imgPicture);
+                        //show image to user
+                        //imgPicture.setImageBitmap(image);
+
+                        startActivity(parseImageActivityIntent);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     //statusMessage.setText(R.string.ocr_failure);
                     Log.d(TAG, "No Text captured, intent data is null");
@@ -522,7 +655,7 @@ public class OcrCaptureFragment extends Fragment {
                 //show image to user
                 //imgPicture.setImageBitmap(image);
                 startActivity(parseImageActivityIntent);
-
+                getActivity().finish();
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -561,8 +694,12 @@ public class OcrCaptureFragment extends Fragment {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File mediaFile;
         if (type == MEDIA_TYPE_IMAGE){
+
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_"+ timeStamp + ".jpg");
+                    "IMG_"+ "RECEIPT" + ".jpg");
+            if (mediaFile.exists()) {
+                mediaFile.delete();
+            }
         } else if(type == MEDIA_TYPE_VIDEO) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
                     "VID_"+ timeStamp + ".mp4");
@@ -572,4 +709,77 @@ public class OcrCaptureFragment extends Fragment {
 
         return mediaFile;
     }
+
+        /**
+         * Decode strem.
+         *
+         * @param fil
+         *            the fil
+         * @param selectedImage
+         *            the selected image
+         * @param mContext
+         *            the m context
+         * @return the bitmap
+         */
+        public static Bitmap decodeStream(File fil, Uri selectedImage,
+                                         Context mContext) {
+
+            Bitmap bitmap = null;
+            try {
+
+                bitmap = BitmapFactory.decodeStream(mContext.getContentResolver()
+                        .openInputStream(selectedImage));
+
+                //final int THUMBNAIL_SIZE = getThumbSize(bitmap);
+
+                //bitmap = Bitmap.createScaledBitmap(bitmap, THUMBNAIL_SIZE,
+                //        THUMBNAIL_SIZE, false);
+
+                //ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                //bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                //bitmap = BitmapFactory.decodeStream(new ByteArrayInputStream(baos
+                 //       .toByteArray()));
+
+                return bitmap; //= rotateImage(bitmap, fil.getAbsolutePath());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return bitmap;
+        }
+
+        /**
+         * Decode file.
+         *
+         * @param f
+         *            the f
+         * @param sampling
+         *            the sampling
+         * @return the bitmap
+         */
+        public static Bitmap decodeFile(File f, int sampling) {
+            try {
+                BitmapFactory.Options o2 = new BitmapFactory.Options();
+                o2.inJustDecodeBounds = true;
+                BitmapFactory.decodeStream(
+                        new FileInputStream(f.getAbsolutePath()), null, o2);
+
+                o2.inSampleSize = sampling;
+                o2.inTempStorage = new byte[48 * 1024];
+
+                o2.inJustDecodeBounds = false;
+                Bitmap bitmap = BitmapFactory.decodeStream(
+                        new FileInputStream(f.getAbsolutePath()), null, o2);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                //bitmap = rotateImage(bitmap, f.getAbsolutePath());
+                return bitmap;
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (OutOfMemoryError e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
 }

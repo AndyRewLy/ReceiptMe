@@ -10,15 +10,19 @@ public class PurchasedItem {
 
     private String itemName;
     private double cost;
-    private Category category;
+    private String category;
 
-    public PurchasedItem(String itemName, double cost, Category category) {
+    public PurchasedItem() {
+
+    }
+
+    public PurchasedItem(String itemName, double cost, String category) {
         this.itemName = itemName;
         this.cost = cost;
         this.category = category;
     }
 
-    public void setCategory(Category category) {
+    public void setCategory(String category) {
         this.category = category;
     }
 
@@ -32,6 +36,14 @@ public class PurchasedItem {
 
     public double getCost() {
         return this.cost;
+    }
+
+    public String getCategory() {
+        return this.category;
+    }
+
+    public String getItemName() {
+        return this.itemName;
     }
 
 }

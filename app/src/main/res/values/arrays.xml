@@ -6,6 +6,8 @@
         <item>Meat</item>
         <item>Vegetable</item>
         <item>Grains</item>
+        <item>Tax</item>
+        <item>Total</item>
         <item>Other</item>
     </string-array>
 </resources>
