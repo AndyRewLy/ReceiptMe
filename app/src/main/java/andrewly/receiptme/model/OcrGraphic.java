@@ -19,11 +19,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import andrewly.receiptme.controller.camera.GraphicOverlay;
 import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -40,7 +43,7 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
     private static Paint sTextPaint;
     private final TextBlock mText;
 
-    OcrGraphic(GraphicOverlay overlay, TextBlock text) {
+    public OcrGraphic(GraphicOverlay overlay, TextBlock text) {
         super(overlay);
 
         mText = text;
@@ -119,4 +122,5 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
             canvas.drawText(currentText.getValue(), left, bottom, sTextPaint);
         }
     }
+
 }

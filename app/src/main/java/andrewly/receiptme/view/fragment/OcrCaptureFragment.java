@@ -55,9 +55,11 @@ import andrewly.receiptme.controller.camera.CameraSourcePreview;
 import andrewly.receiptme.controller.camera.GraphicOverlay;
 import andrewly.receiptme.model.OcrDetectorProcessor;
 import andrewly.receiptme.model.OcrGraphic;
+import andrewly.receiptme.model.TextBlockHolder;
 import andrewly.receiptme.view.Main2Activity;
 import andrewly.receiptme.view.OcrCaptureActivity;
 import andrewly.receiptme.view.ParseImageActivity;
+import andrewly.receiptme.view.reader.TextBlockReader;
 
 import static andrewly.receiptme.view.Main2Activity.mSectionsPagerAdapter;
 import static andrewly.receiptme.view.Main2Activity.mViewPager;
@@ -152,8 +154,23 @@ public class OcrCaptureFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //get an image from the camera
-                Log.d("Taking Picture", "Button was pressed");
+                Intent parseDataIntent = new Intent(getActivity(), ParseImageActivity.class);
+
+                ArrayList<OcrGraphic> graphics = mGraphicOverlay.getAllGraphcs();
+                ArrayList<TextBlock> textBlockHolders = new ArrayList<>();
+
+                for (int i = 0; i < graphics.size(); i++) {
+                    textBlockHolders.add(graphics.get(i).getTextBlock());
+                }
+
+                TextBlockReader.iterateAllTextBlocks(textBlockHolders);
+
+                parseDataIntent.putExtra("photo_capture_bool", true);
+
                 mCameraSource.takePicture(null, mPicture);
+
+                startActivity(parseDataIntent);
+
             }
         });
 

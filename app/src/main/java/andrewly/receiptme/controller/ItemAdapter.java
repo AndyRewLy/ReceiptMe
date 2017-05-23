@@ -56,8 +56,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemHolder> {
         holder.title.setText(item.getItemName());
         holder.cost.setText("" + item.getCost());
         holder.categoryDropdown.setAdapter(createSpinnerAdapter());
-
-        this.notifyItemChanged(position);
     }
 
     @Override
@@ -72,7 +70,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemHolder> {
         return adapter;
     }
 
-    class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private EditText title;
         private EditText cost;
@@ -91,5 +89,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemHolder> {
         public void onClick(View v) {
             //TO-DO
         }
+
+        public String getTitle() { return title.getText().toString();}
+        public double getCost() {return Double.parseDouble(cost.getText().toString());}
+        public String getCategory() { return categoryDropdown.getSelectedItem().toString();}
     }
 }

@@ -50,8 +50,11 @@ import java.util.List;
 import andrewly.receiptme.R;
 import andrewly.receiptme.controller.ItemAdapter;
 import andrewly.receiptme.model.DatabaseHelper;
+import andrewly.receiptme.model.OcrGraphic;
 import andrewly.receiptme.model.PurchasedItem;
+import andrewly.receiptme.model.TextBlockHolder;
 import andrewly.receiptme.model.dao.ItemDao;
+import andrewly.receiptme.view.reader.TextBlockReader;
 
 import static android.R.attr.category;
 import static android.R.attr.value;
@@ -92,42 +95,53 @@ public class ParseImageActivity extends MenuIncludedActivity implements ItemAdap
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(createHelperCallback());
         itemTouchHelper.attachToRecyclerView(itemRecyclerView);
 
-        imgPicture = (ImageView) findViewById(R.id.imgPicture);
-        parsedPriceList = new ArrayList<>();
-        itemsList = new ArrayList<>();
+        boolean isPhotoCapture = getIntent().getBooleanExtra("photo_capture_bool", false);
+        Log.d("value_of_parcelable", getIntent().getParcelableExtra("photo_capture_bool") + "" );
 
-        Uri imageURI = getIntent().getData();
-        InputStream inputStream;
+        if (isPhotoCapture) {
+            parsedPriceList = TextBlockReader.parsedPriceList;
+            itemsList = TextBlockReader.itemsList;
 
-        try {
-            inputStream = getContentResolver().openInputStream(imageURI);
+        }
+        else {
+            imgPicture = (ImageView) findViewById(R.id.imgPicture);
+            parsedPriceList = new ArrayList<>();
+            itemsList = new ArrayList<>();
 
-            // get a bitmap from the stream
-            imageBitmap = BitmapFactory.decodeStream(inputStream);
+            Uri imageURI = getIntent().getData();
+            InputStream inputStream;
 
-            findViewById(R.id.imgPicture);
-            //show image to user
-            //imgPicture.setImageBitmap(imageBitmap);
-            readImage();
+            try {
+                inputStream = getContentResolver().openInputStream(imageURI);
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Unable to open image", Toast.LENGTH_LONG).show();
+                // get a bitmap from the stream
+                imageBitmap = BitmapFactory.decodeStream(inputStream);
+
+                findViewById(R.id.imgPicture);
+                //show image to user
+                //imgPicture.setImageBitmap(imageBitmap);
+                readImage();
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Unable to open image", Toast.LENGTH_LONG).show();
+            }
         }
 
         listData = (ArrayList) ItemDao.getCreatedListData(itemsList, parsedPriceList);
-
 
         //Setting the adapter here
         adapter = new ItemAdapter(listData, this);
         itemRecyclerView.setAdapter(adapter);
 
         //Setup the Save FAB
+
         FloatingActionButton takePictureFab = (FloatingActionButton) findViewById(R.id.fab_submit_data);
         takePictureFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //process data from another method
+                listData = updateListData();
                 databaseHelper.insertPurchasedItems(listData);
             }
         });
@@ -150,61 +164,11 @@ public class ParseImageActivity extends MenuIncludedActivity implements ItemAdap
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
         SparseArray<TextBlock> retBlock = textRecognizer.detect((new Frame.Builder().setBitmap(imageBitmap)).build());
 
-        iterateAllTextBlocks(retBlock);
-    }
+        TextBlockReader.iterateAllTextBlocks(retBlock);
+        parsedPriceList = TextBlockReader.parsedPriceList;
+        itemsList = TextBlockReader.itemsList;
 
-    public void iterateAllTextBlocks(SparseArray<TextBlock> retBlock) {
-        if (retBlock != null) {
-            for (int i = 0; i < retBlock.size(); i++) {
-                Log.i("Recognize Text", "Iterating through current block" + i);
-                iterateThroughTextBlock(retBlock.valueAt(i));
-            }
-        }
-    }
 
-    public void iterateThroughTextBlock(TextBlock textComponents) {
-        if (textComponents != null) {
-            List<? extends Text> textValues = textComponents.getComponents();
-            iterateThroughTextValues(textValues);
-        }
-    }
-
-    public void iterateThroughTextValues(List<? extends Text> textValues) {
-        if (textValues != null) {
-            for (int i = 0; i < textValues.size(); i++) {
-                Log.i("Recognize Text", "Text Found: " + textValues.get(i).getValue());
-                if (checkIfTextIsPrice(textValues.get(i).getValue())) {
-
-                } else {
-                    checkIfTextIsItem(textValues.get(i).getValue());
-                }
-            }
-        }
-    }
-
-    public boolean checkIfTextIsPrice(String value) {
-        double tempValue;
-
-        if (value.contains(".")) {
-            value = value.replaceAll("[^0-9.]", "");
-            Log.i("Recognize Text", "obtained value of " + value);
-
-            String[] removeSpaces = value.split(" ");
-
-            for (int i = 0; i < removeSpaces.length; i++) {
-                tempValue = Double.parseDouble(removeSpaces[i]);
-                parsedPriceList.add((Double) tempValue);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public void checkIfTextIsItem(String value) {
-        value = value.replaceAll("[^A-Za-z,/]", "");
-        Log.i("Recognize Text", "Item name of " + value);
-        itemsList.add(value);
     }
 
     public void createDataTable() {
@@ -416,5 +380,27 @@ public class ParseImageActivity extends MenuIncludedActivity implements ItemAdap
     @Override
     public void onSecondaryIconClick(int p) {
         //TO-DO
+    }
+
+    public ArrayList<PurchasedItem> updateListData() {
+        RecyclerView.LayoutManager layoutManager = itemRecyclerView.getLayoutManager();
+        int lastItemPosition;
+        ArrayList<PurchasedItem> retList = new ArrayList<>();
+
+        lastItemPosition = layoutManager.getItemCount();
+
+        for (int currPosition = 0; currPosition < lastItemPosition; currPosition++) {
+            ItemAdapter.ItemHolder holder = (ItemAdapter.ItemHolder) itemRecyclerView.findViewHolderForAdapterPosition(currPosition);
+
+            PurchasedItem item = new PurchasedItem();
+            item.setItemName(holder.getTitle());
+            item.setCost(holder.getCost());
+            item.setCategory(holder.getCategory());
+
+            retList.add(item);
+        }
+
+        return retList;
+
     }
 }

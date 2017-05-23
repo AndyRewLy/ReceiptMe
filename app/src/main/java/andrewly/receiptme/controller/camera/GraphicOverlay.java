@@ -20,7 +20,9 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -58,6 +60,7 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
     public static abstract class Graphic {
         private GraphicOverlay mOverlay;
 
+        public Graphic() {}
         public Graphic(GraphicOverlay overlay) {
             mOverlay = overlay;
         }
@@ -174,6 +177,16 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
         }
     }
 
+
+    public ArrayList<T> getAllGraphcs() {
+        ArrayList<T> ret = new ArrayList<>();
+
+        for (T graphic: mGraphics) {
+            ret.add(graphic);
+        }
+
+        return ret;
+    }
     /**
      * Sets the camera attributes for size and facing direction, which informs how to transform
      * image coordinates later.
