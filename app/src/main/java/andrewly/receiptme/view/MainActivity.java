@@ -1,177 +1,123 @@
 package andrewly.receiptme.view;
 
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Bundle;
-import android.app.Activity;
-import android.os.Environment;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
+
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-
-import com.google.android.gms.common.api.CommonStatusCodes;
 
 import andrewly.receiptme.R;
+import andrewly.receiptme.model.dao.SQLDatabaseConnector;
+import andrewly.receiptme.view.fragment.CustomFragmentFactory;
 
-/**
- * Main activity demonstrating how to pass extra parameters to an activity that
- * recognizes text.
- */
-public class MainActivity extends MenuIncludedActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
 
-    public static final int IMAGE_GALLERY_REQUEST = 20;
-    // Use a compound button so either checkbox or switch widgets work.
-    private CompoundButton autoFocus;
-    private CompoundButton useFlash;
-    private TextView statusMessage;
-    private TextView textValue;
-    private ImageView imgPicture;
+    public SQLDatabaseConnector databaseHelper;
 
-    private static final int RC_OCR_CAPTURE = 9003;
-    private static final String TAG = "MainActivity";
+    /**
+     * The {@link android.support.v4.view.PagerAdapter} that will provide
+     * fragments for each of the sections. We use a
+     * {@link FragmentPagerAdapter} derivative, which will keep every
+     * loaded fragment in memory. If this becomes too memory intensive, it
+     * may be best to switch to a
+     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+     */
+    public static SectionsPagerAdapter mSectionsPagerAdapter;
 
-    ViewPager viewPager;
+    /**
+     * The {@link ViewPager} that will host the section contents.
+     */
+    public static ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main2);
 
-        /*statusMessage = (TextView)findViewById(R.id.status_message);
-        textValue = (TextView)findViewById(R.id.text_value);
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        autoFocus = (CompoundButton) findViewById(R.id.auto_focus);
-        useFlash = (CompoundButton) findViewById(R.id.use_flash);
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setCurrentItem(1);
 
-        findViewById(R.id.read_text).setOnClickListener(this);
-        imgPicture = (ImageView)findViewById(R.id.imgPicture);
-
-        myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);*/
+        databaseHelper = SQLDatabaseConnector.getInstance(this);
     }
 
-    /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
-     */
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.read_text) {
-            // launch Ocr capture activity.
-            Intent intent = new Intent(this, OcrCaptureActivity.class);
-            intent.putExtra(OcrCaptureActivity.AutoFocus, autoFocus.isChecked());
-            intent.putExtra(OcrCaptureActivity.UseFlash, useFlash.isChecked());
-
-            startActivityForResult(intent, RC_OCR_CAPTURE);
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main2, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        super.onOptionsItemSelected(item);
-        return true;
-    }
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
 
-    public void onUploadClicked(View v) {
-        Intent uploadPhotoIntent = new Intent(Intent.ACTION_PICK);
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
 
-        File pictureDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        String pictureDirectoryPath = pictureDirectory.getPath();
-
-        Uri data = Uri.parse(pictureDirectoryPath);
-
-        uploadPhotoIntent.setDataAndType(data, "image/*");
-
-        startActivityForResult(uploadPhotoIntent, IMAGE_GALLERY_REQUEST);
+        return super.onOptionsItemSelected(item);
     }
 
     /**
-     * Called when an activity you launched exits, giving you the requestCode
-     * you started it with, the resultCode it returned, and any additional
-     * data from it.  The <var>resultCode</var> will be
-     * {@link #RESULT_CANCELED} if the activity explicitly returned that,
-     * didn't return any result, or crashed during its operation.
-     * <p/>
-     * <p>You will receive this call immediately before onResume() when your
-     * activity is re-starting.
-     * <p/>
-     *
-     * @param requestCode The integer request code originally supplied to
-     *                    startActivityForResult(), allowing you to identify who this
-     *                    result came from.
-     * @param resultCode  The integer result code returned by the child activity
-     *                    through its setResult().
-     * @param data        An Intent, which can return result data to the caller
-     *                    (various data can be attached to Intent "extras").
-     * @see #startActivityForResult
-     * @see #createPendingResult
-     * @see #setResult(int)
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
      */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == RC_OCR_CAPTURE) {
-            if (resultCode == CommonStatusCodes.SUCCESS) {
-                if (data != null) {
-                    String text = data.getStringExtra(OcrCaptureActivity.TextBlockObject);
-                    statusMessage.setText(R.string.ocr_success);
-                    textValue.setText(text);
-                    Log.d(TAG, "Text read: " + text);
-                } else {
-                    statusMessage.setText(R.string.ocr_failure);
-                    Log.d(TAG, "No Text captured, intent data is null");
-                }
-            } else {
-                statusMessage.setText(String.format(getString(R.string.ocr_error),
-                        CommonStatusCodes.getStatusCodeString(resultCode)));
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        private CustomFragmentFactory factory = new CustomFragmentFactory();
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            String fragmentString = null;
+
+            // getItem is called to instantiate the fragment for the given page.
+            // Return a PlaceholderFragment (defined as a static inner class below).
+            if (position == 1) {
+                fragmentString = "OcrCapture";
             }
-        } else if (resultCode == RESULT_OK && requestCode == IMAGE_GALLERY_REQUEST) {
-            Uri imageURI = data.getData();
-
-            //reading image data from SD card
-            InputStream inputStream;
-
-            try {
-                Intent parseImageActivityIntent = new Intent(this, ParseImageActivity.class);
-                parseImageActivityIntent.setData(imageURI);
-                inputStream = getContentResolver().openInputStream(imageURI);
-
-                // get a bitmap from the stream
-                Bitmap image = BitmapFactory.decodeStream(inputStream);
-
-                findViewById(R.id.imgPicture);
-                //show image to user
-                //imgPicture.setImageBitmap(image);
-                startActivity(parseImageActivityIntent);
-
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Unable to open image", Toast.LENGTH_LONG).show();
+            else {
+                fragmentString = "Placeholder";
             }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
+
+            return factory.createFragment(fragmentString, position + 1); //PlaceholderFragment.newInstance(position + 1);
+        }
+
+        @Override
+        public int getCount() {
+            // Show 3 total pages.
+            return 3;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "SECTION 1";
+                case 1:
+                    return "SECTION 2";
+                case 2:
+                    return "SECTION 3";
+            }
+            return null;
         }
     }
 }

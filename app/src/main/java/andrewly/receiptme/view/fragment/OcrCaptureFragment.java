@@ -16,7 +16,6 @@ import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -38,7 +37,6 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,8 +44,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.*;
-import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import andrewly.receiptme.R;
 import andrewly.receiptme.controller.camera.CameraSource;
@@ -55,20 +55,13 @@ import andrewly.receiptme.controller.camera.CameraSourcePreview;
 import andrewly.receiptme.controller.camera.GraphicOverlay;
 import andrewly.receiptme.model.OcrDetectorProcessor;
 import andrewly.receiptme.model.OcrGraphic;
-import andrewly.receiptme.model.TextBlockHolder;
-import andrewly.receiptme.view.Main2Activity;
-import andrewly.receiptme.view.OcrCaptureActivity;
 import andrewly.receiptme.view.ParseImageActivity;
 import andrewly.receiptme.view.reader.TextBlockReader;
 
-import static andrewly.receiptme.view.Main2Activity.mSectionsPagerAdapter;
-import static andrewly.receiptme.view.Main2Activity.mViewPager;
-import static andrewly.receiptme.view.MainActivity.IMAGE_GALLERY_REQUEST;
+import static android.app.Activity.RESULT_OK;
+
 //import static andrewly.receiptme.view.fragment.ScaleListener.decodeFile;
 //import static andrewly.receiptme.view.fragment.ScaleListener.decodeStream;
-import static android.R.attr.data;
-import static android.app.Activity.RESULT_OK;
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 /**
  * Created by Andrew Ly on 5/8/2017.
@@ -85,6 +78,7 @@ public class OcrCaptureFragment extends Fragment {
     private static final int RC_HANDLE_GMS = 9001;
     private static final int RC_OCR_CAPTURE = 9003;
     public static final int IMAGE_GALLERY_REQUEST = 20;
+    public static final int RECEIPT_WRITE_EXTERNAL_STORAGE = 21;
 
     // Permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
@@ -143,10 +137,18 @@ public class OcrCaptureFragment extends Fragment {
         showImageView = (ImageView) rootView.findViewById(R.id.imagePreview);
 
         int rc = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA);
+        int storage = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
         if (rc == PackageManager.PERMISSION_GRANTED) {
             createCameraSource(true, false);
-        } else {
+        }
+        else {
             requestCameraPermission();
+        }
+
+        if (storage != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    RECEIPT_WRITE_EXTERNAL_STORAGE);
         }
 
         FloatingActionButton takePictureFab = (FloatingActionButton) rootView.findViewById(R.id.fab_ocr);
@@ -621,40 +623,8 @@ public class OcrCaptureFragment extends Fragment {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d("Picture Taken", "On Activity Result method rn");
-        if(requestCode == RC_OCR_CAPTURE) {
-            if (resultCode == CommonStatusCodes.SUCCESS) {
-                if (data != null) {
-                    Uri imageURI = data.getData();
 
-                    Log.d("LETS GOOOOO", "SUCCESS CAUSE DATA NOT NULL");
-                    String text = data.getStringExtra(OcrCaptureActivity.TextBlockObject);
-
-                    try {
-                        Intent parseImageActivityIntent = new Intent(getActivity(), ParseImageActivity.class);
-                        parseImageActivityIntent.setData(imageURI);
-                        InputStream inputStream = getActivity().getContentResolver().openInputStream(imageURI);
-
-                        // get a bitmap from the stream
-                        Bitmap image = BitmapFactory.decodeStream(inputStream);
-
-                        getActivity().findViewById(R.id.imgPicture);
-                        //show image to user
-                        //imgPicture.setImageBitmap(image);
-
-                        startActivity(parseImageActivityIntent);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    //statusMessage.setText(R.string.ocr_failure);
-                    Log.d(TAG, "No Text captured, intent data is null");
-                }
-            } else {
-                //statusMessage.setText(String.format(getString(R.string.ocr_error),
-                 //       CommonStatusCodes.getStatusCodeString(resultCode)));
-            }
-        } else if (resultCode == RESULT_OK && requestCode == IMAGE_GALLERY_REQUEST) {
+        if (resultCode == RESULT_OK && requestCode == IMAGE_GALLERY_REQUEST) {
             Uri imageURI = data.getData();
 
             //reading image data from SD card
