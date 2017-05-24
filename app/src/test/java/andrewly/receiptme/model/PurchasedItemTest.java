@@ -23,6 +23,7 @@ public class PurchasedItemTest {
         assertEquals(expected, result, 0.000001);
     }
 
+    @Test
     public void setCategoryTest() throws Exception {
         PurchasedItem p = new PurchasedItem();
         String expected, result;
@@ -35,6 +36,7 @@ public class PurchasedItemTest {
         assertEquals(expected, result);
     }
 
+    @Test
     public void setItemNameTest() throws Exception {
         PurchasedItem p = new PurchasedItem();
         String expected, result;
