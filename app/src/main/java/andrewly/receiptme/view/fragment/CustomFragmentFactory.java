@@ -22,6 +22,9 @@ public class CustomFragmentFactory {
             case "OcrCapture":
                 returnFragment = OcrCaptureFragment.newInstance(position);
                 break;
+            case "Graph":
+                returnFragment = GraphFragment.newInstance(position);
+                break;
             default:
                 returnFragment = null;
                 break;

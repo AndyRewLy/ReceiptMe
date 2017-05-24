@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/frozen"
+        android:title="Frozen"/>
+
+    <item
+        android:id="@+id/vegetable"
+        android:title="Vegetable"/>
+
+    <item
+        android:id="@+id/fruit"
+        android:title="fruit"/>
+
+    <item
+        android:id="@+id/meat"
+        android:title="meat"/>
+</menu>

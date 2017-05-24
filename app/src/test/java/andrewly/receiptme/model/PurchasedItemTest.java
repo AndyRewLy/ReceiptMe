@@ -22,4 +22,28 @@ public class PurchasedItemTest {
 
         assertEquals(expected, result, 0.000001);
     }
+
+    public void setCategoryTest() throws Exception {
+        PurchasedItem p = new PurchasedItem();
+        String expected, result;
+
+        expected = "frozen";
+
+        p.setCategory(expected);
+        result = p.getCategory();
+
+        assertEquals(expected, result);
+    }
+
+    public void setItemNameTest() throws Exception {
+        PurchasedItem p = new PurchasedItem();
+        String expected, result;
+
+        expected = "oranges";
+
+        p.setCategory(expected);
+        result = p.getCategory();
+
+        assertEquals(expected, result);
+    }
 }
