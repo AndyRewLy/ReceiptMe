@@ -286,47 +286,6 @@ public class OcrCaptureFragment extends Fragment {
         return retCallBack;
     };
 
-    /*private CameraSource.PictureCallback createPictureCallBack() {
-        CameraSource.PictureCallback returnCallBack = new CameraSource.PictureCallback() {
-            @Override
-            public void onPictureTaken(byte[] data) {
-                File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-
-                if (pictureFile == null) {
-                    Log.d(TAG, "Error creating media file, check storage permissions:");
-                    return;
-                }
-
-                try {
-                    FileOutputStream fos = new FileOutputStream(pictureFile);
-                    fos.write(data);
-                    fos.close();
-
-                    FileInputStream pictureStream = new FileInputStream(pictureFile);
-                    Bitmap bitmap = BitmapFactory.decodeStream(pictureStream);
-
-
-                    Intent intent = new Intent();
-
-                    Uri intentData = Uri.fromFile(pictureFile);
-
-                    intent.setDataAndType(intentData, "image/*");
-
-                    startActivityForResult(intent, RC_OCR_CAPTURE);
-
-                    Log.d(TAG,"file has been written");
-                } catch (FileNotFoundException e) {
-                    Log.d(TAG, "File not found: " + e.getMessage());
-                } catch (IOException e) {
-                    Log.d(TAG, "Error accessing file: " + e.getMessage());
-                }
-
-            }
-        };
-
-        return returnCallBack;
-    }*/
-
     /**
      * Handles the requesting of the camera permission.  This includes
      * showing a "Snackbar" message of why the permission is needed then

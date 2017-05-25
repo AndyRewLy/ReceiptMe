@@ -1,7 +1,5 @@
 package andrewly.receiptme.model;
 
-import andrewly.receiptme.model.categories.Category;
-
 /**
  * Created by Andrew Ly on 5/9/2017.
  */

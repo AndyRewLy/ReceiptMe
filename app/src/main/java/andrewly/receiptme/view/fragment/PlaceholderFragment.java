@@ -2,15 +2,12 @@ package andrewly.receiptme.view.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import andrewly.receiptme.R;
-
-import static andrewly.receiptme.R.id.container;
 
 /**
  * Created by Andrew Ly on 5/8/2017.

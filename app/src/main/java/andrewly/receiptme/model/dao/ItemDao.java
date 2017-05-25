@@ -6,10 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import andrewly.receiptme.model.PurchasedItem;
-import andrewly.receiptme.model.class_storage.Item;
 
 /**
  * Created by Andrew Ly on 4/28/2017.
