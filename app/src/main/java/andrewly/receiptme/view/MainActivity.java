@@ -1,5 +1,6 @@
 package andrewly.receiptme.view;
 
+import android.support.annotation.VisibleForTesting;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v4.app.Fragment;
@@ -14,6 +15,7 @@ import andrewly.receiptme.R;
 import andrewly.receiptme.model.dao.SQLDatabaseConnector;
 import andrewly.receiptme.view.fragment.CustomFragmentFactory;
 
+@VisibleForTesting
 public class MainActivity extends AppCompatActivity {
 
     public SQLDatabaseConnector databaseHelper;
