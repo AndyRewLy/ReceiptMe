@@ -62,7 +62,7 @@ public class TextBlockReader {
         }
     }
 
-    private static boolean checkIfTextIsPrice(String value) {
+    public static boolean checkIfTextIsPrice(String value) {
         double tempValue;
 
         if (value.contains(".")) {
@@ -83,7 +83,7 @@ public class TextBlockReader {
         return false;
     }
 
-    private static void checkIfTextIsItem(String value) {
+    public static void checkIfTextIsItem(String value) {
         value = value.replaceAll("[^A-Za-z,/]", "");
         Log.i("Recognize Text", "Item name of " + value);
         itemsList.add(value);
