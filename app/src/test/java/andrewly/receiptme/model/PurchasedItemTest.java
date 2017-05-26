@@ -43,8 +43,8 @@ public class PurchasedItemTest {
 
         expected = "oranges";
 
-        p.setCategory(expected);
-        result = p.getCategory();
+        p.setItemName(expected);
+        result = p.getItemName();
 
         assertEquals(expected, result);
     }
