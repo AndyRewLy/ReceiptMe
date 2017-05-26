@@ -1,4 +1,4 @@
-package andrewly.receiptme.view.reader;
+package andrewly.receiptme.model.ocr;
 
 import android.util.Log;
 import android.util.SparseArray;

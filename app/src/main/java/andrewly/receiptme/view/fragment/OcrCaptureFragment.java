@@ -53,10 +53,10 @@ import andrewly.receiptme.R;
 import andrewly.receiptme.controller.camera.CameraSource;
 import andrewly.receiptme.controller.camera.CameraSourcePreview;
 import andrewly.receiptme.controller.camera.GraphicOverlay;
-import andrewly.receiptme.model.OcrDetectorProcessor;
-import andrewly.receiptme.model.OcrGraphic;
+import andrewly.receiptme.controller.camera.OcrDetectorProcessor;
+import andrewly.receiptme.model.ocr.OcrGraphic;
 import andrewly.receiptme.view.ParseImageActivity;
-import andrewly.receiptme.view.reader.TextBlockReader;
+import andrewly.receiptme.model.ocr.TextBlockReader;
 
 import static android.app.Activity.RESULT_OK;
 

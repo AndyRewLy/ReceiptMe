@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package andrewly.receiptme.model;
+package andrewly.receiptme.controller.camera;
 
 import android.util.SparseArray;
 
-import andrewly.receiptme.controller.camera.GraphicOverlay;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.text.TextBlock;
+
+import andrewly.receiptme.model.ocr.OcrGraphic;
 
 /**
  * A very simple Processor which receives detected TextBlocks and adds them to the overlay

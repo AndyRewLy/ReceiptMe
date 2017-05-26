@@ -1,4 +1,4 @@
-package andrewly.receiptme.controller;
+package andrewly.receiptme.view.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -8,9 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import andrewly.receiptme.R;

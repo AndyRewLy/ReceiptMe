@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package andrewly.receiptme.model;
+package andrewly.receiptme.model.ocr;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.os.Parcel;
-import android.os.Parcelable;
 
-import andrewly.receiptme.controller.camera.GraphicOverlay;
 import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 
-import java.io.Serializable;
 import java.util.List;
+
+import andrewly.receiptme.controller.camera.GraphicOverlay;
 
 /**
  * Graphic instance for rendering TextBlock position, size, and ID within an associated graphic

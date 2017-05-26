@@ -28,11 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import andrewly.receiptme.R;
-import andrewly.receiptme.controller.ItemAdapter;
+import andrewly.receiptme.view.adapter.ItemAdapter;
 import andrewly.receiptme.model.PurchasedItem;
 import andrewly.receiptme.model.dao.ItemDao;
 import andrewly.receiptme.model.dao.SQLDatabaseConnector;
-import andrewly.receiptme.view.reader.TextBlockReader;
+import andrewly.receiptme.model.ocr.TextBlockReader;
 
 @SuppressWarnings("CheckStyle")
 public class ParseImageActivity extends AppCompatActivity implements ItemAdapter.ItemClickCallback {
