@@ -142,8 +142,6 @@ public class ParseImageActivity extends AppCompatActivity implements ItemAdapter
         TextBlockReader.iterateAllTextBlocks(retBlock);
         parsedPriceList = TextBlockReader.parsedPriceList;
         itemsList = TextBlockReader.itemsList;
-
-
     }
 
     private ItemTouchHelper.Callback createHelperCallback() {
@@ -192,15 +190,11 @@ public class ParseImageActivity extends AppCompatActivity implements ItemAdapter
         for (int currPosition = 0; currPosition < lastItemPosition; currPosition++) {
             ItemAdapter.ItemHolder holder = (ItemAdapter.ItemHolder) itemRecyclerView.findViewHolderForAdapterPosition(currPosition);
 
-            PurchasedItem item = new PurchasedItem();
-            item.setItemName(holder.getTitle());
-            item.setCost(holder.getCost());
-            item.setCategory(holder.getCategory());
+            PurchasedItem item = new PurchasedItem(holder.getTitle(), holder.getCost(), holder.getCategory());
 
             retList.add(item);
         }
 
         return retList;
-
     }
 }

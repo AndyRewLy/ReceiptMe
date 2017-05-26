@@ -1,39 +1,42 @@
 package andrewly.receiptme.model.ocr;
 
-import android.content.Context;
-import android.util.Log;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+
+import andrewly.receiptme.controller.camera.GraphicOverlay;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 
 /**
  * Created by Andrew Ly on 5/25/2017.
  */
-
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Log.class})
 public class OcrGraphicTest {
 
-    @Mock
-    Context mMockContext;
-
     @Test
-    public void ocrGraphicTest() throws Exception {
-        OcrGraphic testGraphic = new OcrGraphic(null, null);
+    public void setIdTest() throws Exception {
+        OcrGraphic graphicTest = new OcrGraphic(new GraphicOverlay(null, null), null);
+
         int expected, result;
 
-        expected = 10;
+        expected = 1;
 
-        testGraphic.setId(expected);
-        result = testGraphic.getId();
+        graphicTest.setId(expected);
+        result = graphicTest.getId();
 
         assertEquals(expected, result);
+    }
 
+    @Test
+    public void getTextBlockTest() throws Exception {
+        OcrGraphic graphicTest = new OcrGraphic(new GraphicOverlay(null, null), null);
 
+        assertEquals(null, graphicTest.getTextBlock());
+    }
+
+    @Test
+    public void blockContainsTest() throws Exception {
+        OcrGraphic graphicTest = new OcrGraphic(new GraphicOverlay(null, null), null);
+
+        assertFalse(graphicTest.contains(0, 0));
     }
 }
