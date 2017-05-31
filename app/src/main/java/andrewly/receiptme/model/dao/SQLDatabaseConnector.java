@@ -4,12 +4,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import java.io.File;
 import java.util.List;
 
 import andrewly.receiptme.model.PurchasedItem;
-
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by Andrew Ly on 5/22/2017.
@@ -26,7 +23,12 @@ public class SQLDatabaseConnector extends SQLiteOpenHelper {
     private static String createItems = "CREATE TABLE IF NOT EXISTS Items(" +
             "   itemName VARCHAR(64)," +
             "   itemPrice DOUBLE," +
-            "   category VARCHAR(64)" +
+            "   category VARCHAR(64)," +
+            "   dateInput DATE" +
+            ");";
+
+    private static String createBudget = "CREATE TABLE IF NOT EXISTS Budget (" +
+            "   weeklyBudget INT" +
             ");";
 
     private SQLDatabaseConnector (Context context) {
@@ -45,11 +47,14 @@ public class SQLDatabaseConnector extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(createItems);
+        db.execSQL(createBudget);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("DROP TABLE IF EXISTS Items");
+        db.execSQL("DROP TABLE IF EXISTS Budget");
+        onCreate(db);
     }
 
     public void insertPurchasedItems(List<PurchasedItem> items) {

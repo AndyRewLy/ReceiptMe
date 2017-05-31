@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import andrewly.receiptme.model.PurchasedItem;
@@ -18,6 +20,7 @@ public class ItemDao {
     private static final String NAME = "itemName";
     private static final String PRICE = "itemPrice";
     private static final String CATEGORY = "category";
+    private static final String DATE = "dateInput";
 
     private static final String[] titles = {"sup sup sup", "ok ok ok", "hi hi hi"};
     //private static final int[] icons;
@@ -78,9 +81,17 @@ public class ItemDao {
         SQLiteDatabase db = SQLDatabaseConnector.getInstance(c).getWritableDatabase();
         ContentValues values = new ContentValues();
 
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0); //anything 0 - 23
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+
+        Date d1 = today.getTime();
         values.put(NAME, itemName);
         values.put(PRICE, itemPrice);
         values.put(CATEGORY, itemCategory);
+
+        values.put(DATE, d1.toString());
 
         db.insertOrThrow("Items", null, values);
 
