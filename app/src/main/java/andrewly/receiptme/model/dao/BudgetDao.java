@@ -14,19 +14,20 @@ public class BudgetDao {
     public static double getBudget() {
         String queryString = "SELECT budget FROM Budget";
 
+        double budget = 0;
+
         Cursor cursor = SQLDatabaseConnector.getInstance().getReadableDatabase().rawQuery(queryString, new String[0]);
 
         while(cursor.moveToNext()) {
-            double budget = cursor.getDouble(0);
+            budget = cursor.getDouble(0);
 
             Log.d("AllCosts", "Budget is " + budget);
 
-            return budget;
         }
 
         cursor.close();
 
-        return 0;
+        return budget;
     }
 
     public static void editBudget(double newBudget) {

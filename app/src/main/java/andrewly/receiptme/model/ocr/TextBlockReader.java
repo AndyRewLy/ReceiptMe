@@ -75,8 +75,8 @@ public class TextBlockReader {
                 for (int i = 0; i < removeSpaces.length; i++) {
                     tempValue = Double.parseDouble(removeSpaces[i]);
                     parsedPriceList.add((Double) tempValue);
-                    return true;
                 }
+                return true;
             }
         }
 
