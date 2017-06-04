@@ -468,7 +468,7 @@ public class CameraSource {
             currentZoom = parameters.getZoom() + 1;
             float newZoom;
             if (scale > 1) {
-                newZoom = currentZoom + scale * (maxZoom / 10);
+                newZoom = currentZoom + scale * ((float)maxZoom / 10);
             } else {
                 newZoom = currentZoom * scale;
             }
@@ -1033,7 +1033,7 @@ public class CameraSource {
      */
     private byte[] createPreviewBuffer(Size previewSize) {
         int bitsPerPixel = ImageFormat.getBitsPerPixel(ImageFormat.NV21);
-        long sizeInBits = previewSize.getHeight() * previewSize.getWidth() * bitsPerPixel;
+        long sizeInBits = (long)previewSize.getHeight() * previewSize.getWidth() * bitsPerPixel;
         int bufferSize = (int) Math.ceil(sizeInBits / 8.0d) + 1;
 
         //

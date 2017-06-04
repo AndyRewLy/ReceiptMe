@@ -43,7 +43,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,8 +54,8 @@ import andrewly.receiptme.controller.camera.CameraSourcePreview;
 import andrewly.receiptme.controller.camera.GraphicOverlay;
 import andrewly.receiptme.controller.camera.OcrDetectorProcessor;
 import andrewly.receiptme.model.ocr.OcrGraphic;
-import andrewly.receiptme.view.ParseImageActivity;
 import andrewly.receiptme.model.ocr.TextBlockReader;
+import andrewly.receiptme.view.ParseImageActivity;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -260,25 +259,23 @@ public class OcrCaptureFragment extends Fragment {
                                 "Failed to Capture the picture. kindly Try Again:",
                                 Toast.LENGTH_LONG).show();
                     }
-                } catch (
-                        FileNotFoundException e)
+                } catch (FileNotFoundException e)
 
                 {
                     e.printStackTrace();
-                } catch (
-                        IOException e)
+                } catch (IOException e)
 
                 {
                     e.printStackTrace();
-                } finally
-
-                {
-                    //if (mPreview != null) {
-                    //    mPreview.release();
-                    //}
-                    //if (mCameraSource != null) {
-                    //    mCameraSource.release();
-                    //}
+                } finally {
+                    if (outStream != null) {
+                        try {
+                            outStream.close();
+                        }
+                        catch (IOException e) {
+                            Log.d(TAG, e.getMessage());
+                        }
+                    }
                 }
             }
         };
@@ -586,27 +583,15 @@ public class OcrCaptureFragment extends Fragment {
         if (resultCode == RESULT_OK && requestCode == IMAGE_GALLERY_REQUEST) {
             Uri imageURI = data.getData();
 
-            //reading image data from SD card
-            InputStream inputStream;
+            Intent parseImageActivityIntent = new Intent(getActivity(), ParseImageActivity.class);
+            parseImageActivityIntent.setData(imageURI);
 
-            try {
-                Intent parseImageActivityIntent = new Intent(getActivity(), ParseImageActivity.class);
-                parseImageActivityIntent.setData(imageURI);
-                inputStream = getActivity().getContentResolver().openInputStream(imageURI);
+            getActivity().findViewById(R.id.imgPicture);
+            //show image to user
+            //imgPicture.setImageBitmap(image);
+            startActivity(parseImageActivityIntent);
+            getActivity().finish();
 
-                // get a bitmap from the stream
-                Bitmap image = BitmapFactory.decodeStream(inputStream);
-
-                getActivity().findViewById(R.id.imgPicture);
-                //show image to user
-                //imgPicture.setImageBitmap(image);
-                startActivity(parseImageActivityIntent);
-                getActivity().finish();
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                Toast.makeText(getActivity(), "Unable to open image", Toast.LENGTH_LONG).show();
-            }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
