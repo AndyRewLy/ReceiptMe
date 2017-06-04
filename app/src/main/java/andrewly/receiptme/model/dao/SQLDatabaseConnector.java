@@ -15,7 +15,7 @@ import andrewly.receiptme.model.PurchasedItem;
 public class SQLDatabaseConnector extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "receiptme.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 4;
 
     private static SQLDatabaseConnector instance;
     private Context context;
@@ -28,7 +28,7 @@ public class SQLDatabaseConnector extends SQLiteOpenHelper {
             ");";
 
     private static String createBudget = "CREATE TABLE IF NOT EXISTS Budget (" +
-            "   weeklyBudget INT" +
+            "   budget DOUBLE" +
             ");";
 
     private SQLDatabaseConnector (Context context) {
@@ -38,9 +38,13 @@ public class SQLDatabaseConnector extends SQLiteOpenHelper {
 
     public static SQLDatabaseConnector getInstance(Context context) {
         if (instance == null) {
-            SQLDatabaseConnector instance = new SQLDatabaseConnector(context);
+            instance = new SQLDatabaseConnector(context);
         }
 
+        return instance;
+    }
+
+    public static SQLDatabaseConnector getInstance() {
         return instance;
     }
 

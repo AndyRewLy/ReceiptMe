@@ -1,12 +1,13 @@
 package andrewly.receiptme.view;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -28,11 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import andrewly.receiptme.R;
-import andrewly.receiptme.view.adapter.ItemAdapter;
 import andrewly.receiptme.model.PurchasedItem;
 import andrewly.receiptme.model.dao.ItemDao;
 import andrewly.receiptme.model.dao.SQLDatabaseConnector;
 import andrewly.receiptme.model.ocr.TextBlockReader;
+import andrewly.receiptme.view.adapter.ItemAdapter;
 
 @SuppressWarnings("CheckStyle")
 public class ParseImageActivity extends AppCompatActivity implements ItemAdapter.ItemClickCallback {
@@ -117,7 +118,15 @@ public class ParseImageActivity extends AppCompatActivity implements ItemAdapter
             public void onClick(View view) {
                 //process data from another method
                 listData = updateListData();
-                databaseHelper.insertPurchasedItems(listData);
+
+                SQLDatabaseConnector.getInstance(getApplicationContext()).insertPurchasedItems(listData);
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+
+                startActivity(intent);
+
+                finish();
+
+
             }
         });
     }
@@ -190,9 +199,11 @@ public class ParseImageActivity extends AppCompatActivity implements ItemAdapter
         for (int currPosition = 0; currPosition < lastItemPosition; currPosition++) {
             ItemAdapter.ItemHolder holder = (ItemAdapter.ItemHolder) itemRecyclerView.findViewHolderForAdapterPosition(currPosition);
 
-            PurchasedItem item = new PurchasedItem(holder.getTitle(), holder.getCost(), holder.getCategory());
+            if (holder != null && holder.getTitle() != null) {
+                PurchasedItem item = new PurchasedItem(holder.getTitle(), holder.getCost(), holder.getCategory());
 
-            retList.add(item);
+                retList.add(item);
+            }
         }
 
         return retList;

@@ -3,6 +3,7 @@ package andrewly.receiptme.model.dao;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -86,11 +87,14 @@ public class ItemDao {
         today.set(Calendar.MINUTE, 0);
         today.set(Calendar.SECOND, 0);
 
+
+
         Date d1 = today.getTime();
+        Log.d("DateReceived", d1.toString());
+
         values.put(NAME, itemName);
         values.put(PRICE, itemPrice);
         values.put(CATEGORY, itemCategory);
-
         values.put(DATE, d1.toString());
 
         db.insertOrThrow("Items", null, values);

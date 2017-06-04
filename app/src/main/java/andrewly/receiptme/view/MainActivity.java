@@ -99,6 +99,9 @@ public class MainActivity extends AppCompatActivity {
             else if (position == 1) {
                 fragmentString = "OcrCapture";
             }
+            else if (position == 2) {
+                fragmentString = "Budget";
+            }
             else {
                 fragmentString = "Placeholder";
             }

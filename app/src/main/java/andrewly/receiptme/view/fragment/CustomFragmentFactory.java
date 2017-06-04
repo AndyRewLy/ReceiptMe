@@ -25,6 +25,9 @@ public class CustomFragmentFactory {
             case "Graph":
                 returnFragment = GraphFragment.newInstance(position);
                 break;
+            case "Budget":
+                returnFragment = BudgetFragment.newInstance(position);
+                break;
             default:
                 returnFragment = null;
                 break;
