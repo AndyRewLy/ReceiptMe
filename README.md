@@ -17,3 +17,7 @@ Within the DAO package all references/connections to the database are created in
 # View Package
 
 The view package contains all Android activities and deals with maintenance of the UI.  The Factory Pattern is used within the fragment package to create different fragments based off of user input and the current screen.
+
+#Github Pages
+
+https://cpe305spring17.github.io/spring2017-project-AndyRewLy/
