@@ -1,4 +1,4 @@
-https://travis-ci.org/cpe305Spring17/spring2017-project-AndyRewLy.svg?branch=master
+![alt text](https://travis-ci.org/cpe305Spring17/spring2017-project-AndyRewLy.svg?branch=master)
 
 # ReceiptMe
 
