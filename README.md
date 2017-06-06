@@ -1,3 +1,5 @@
+https://travis-ci.org/cpe305Spring17/spring2017-project-AndyRewLy.svg?branch=master
+
 # ReceiptMe
 
 ReceiptMe is an Android Application that allows users to take photos of receipts/upload receipts and store receipt data.  Users can see their spendings over time and also budget themselves.
