@@ -23,3 +23,19 @@ The view package contains all Android activities and deals with maintenance of t
 # Github Pages
 
 https://cpe305spring17.github.io/spring2017-project-AndyRewLy/
+
+# Screen Captures
+<p><img src="https://github.com/cpe305Spring17/spring2017-project-AndyRewLy/blob/master/websiteImages/Screenshot_20170604-135549.png?raw=true" width="290">
+    <img src="https://github.com/cpe305Spring17/spring2017-project-AndyRewLy/blob/master/websiteImages/Screenshot_20170604-140034.png?raw=true" width="290">
+    <img src="https://github.com/cpe305Spring17/spring2017-project-AndyRewLy/blob/master/websiteImages/Screenshot_20170604-140132.png?raw=true" width="290"></p>
+<p><img src="https://github.com/cpe305Spring17/spring2017-project-AndyRewLy/blob/master/websiteImages/Screenshot_20170604-140139.png?raw=true" width="290">
+    <img src="https://github.com/cpe305Spring17/spring2017-project-AndyRewLy/blob/master/websiteImages/Screenshot_20170604-140153.png?raw=true" width="290"></p>
+# Class Diagrams
+
+<img src="https://github.com/cpe305Spring17/spring2017-project-AndyRewLy/blob/master/websiteImages/Factory%20Design%20Pattern.png?raw=true">
+<img src="https://github.com/cpe305Spring17/spring2017-project-AndyRewLy/blob/master/websiteImages/Singleton%20Design%20Pattern.png?raw=true">
+
+# Design Patterns
+The design patterns I used include the Factory Design Pattern and the Singleton Design Pattern.
+The factory design pattern is used to handle UI components with the fragments to ensure that I'm able to create specific fragments based off of criteria.
+The singleton design pattern is used to make sure that I do not have more than one instance of either the database connector or the Today class.
