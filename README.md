@@ -4,6 +4,11 @@
 
 ReceiptMe is an Android Application that allows users to take photos of receipts/upload receipts and store receipt data.  Users can see their spendings over time and also budget themselves.
 
+   - Take pictures of your receipt to keep track of your spendings
+   - Upload a photo to keep track of your spendings
+   - View expenditures over the past seven days.
+   - Provide yourself with a daily budget.
+
 # OCR
 
 This application utilizes Google's OCR API to parse receipts and read information from them.  OCR usage references an example project createed from the Google tutorial on OCR.  OCR can be see within the controller.camera package.  
